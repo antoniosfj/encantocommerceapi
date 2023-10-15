@@ -1,6 +1,9 @@
+from collections.abc import Iterable
 from django.db import models
 from .fields import PathField
 from django.contrib.postgres.indexes import GistIndex
+from django.core.exceptions import ValidationError
+from django.utils.translation import gettext_lazy as _
 
 
 class BaseModel(models.Model):
@@ -12,6 +15,7 @@ class BaseModel(models.Model):
 
 
 class Category(BaseModel):
+    # Think how should update and deletes should be handled
     path = PathField()
     image = models.ImageField(upload_to="categories/logo", null=True, blank=True)
 
@@ -20,6 +24,19 @@ class Category(BaseModel):
         indexes = [
             GistIndex(fields=['path'], name='path_gist_idx')
         ]
+
+    def save(self, force_insert: bool = ..., force_update: bool = ..., using: str | None = ..., update_fields: Iterable[str] | None = ...) -> None:
+        # Maybe add a trigger function
+        # Capitalize all ancestors
+        self.path = '.'.join(x.capitalize() for x in self.path.split('.'))
+        ancestors = self.path[:-1]
+
+        if not self.objects.filter(path__startswith=ancestors).first():
+            raise ValidationError(
+                _('Invalid ancestors ("%(ancestors)s") for path "%(path)s".'),
+                params={'ancestors': ancestors, 'path': self.path})
+
+        return super().save(force_insert, force_update, using, update_fields)
 
 
 class Brand(BaseModel):
