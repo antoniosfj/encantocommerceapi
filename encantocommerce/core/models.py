@@ -12,7 +12,7 @@ class BaseModel(models.Model):
 
 class Category(BaseModel):
     path = PathField()
-    image = models.ImageField(upload_to="categories/logo")
+    image = models.ImageField(upload_to="categories/logo", null=True, blank=True)
 
     class Meta:
         get_latest_by = 'created_at'
@@ -21,7 +21,7 @@ class Category(BaseModel):
 class Brand(BaseModel):
     name = models.CharField(max_length=511, null=False, blank=False)
     description = models.TextField()
-    image = models.ImageField(upload_to="brands/logo")
+    image = models.ImageField(upload_to="brands/logo", null=True, blank=True)
 
 
 class Product(BaseModel):
