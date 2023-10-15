@@ -1,5 +1,6 @@
 from django.db import models
 from .fields import PathField
+from django.contrib.postgres.indexes import GistIndex
 
 
 class BaseModel(models.Model):
@@ -16,6 +17,9 @@ class Category(BaseModel):
 
     class Meta:
         get_latest_by = 'created_at'
+        indexes = [
+            GistIndex(fields=['path'], name='path_gist_idx')
+        ]
 
 
 class Brand(BaseModel):
